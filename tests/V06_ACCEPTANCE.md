@@ -1,7 +1,7 @@
 # v0.6 upgrade and acceptance tests
 
 **Reference environment:** Windows 11 in VirtualBox, Microsoft Excel 2019 Desktop.
-**Status:** clean three-module source and PowerShell builder published; automated clean XLSM build not yet verified inside Excel. v0.5 is backed up in Git branch `backup/v0.5-working`.
+**Status:** clean three-module source and PowerShell builder published; automated clean XLSM build and basic operation confirmed by the project owner on Windows 11 / Excel 2019 / VirtualBox. Individual test cases remain unverified unless explicitly recorded. v0.5 is backed up in Git branch `backup/v0.5-working`.
 
 ## Safe upgrade from working v0.5
 
@@ -57,4 +57,4 @@ If v0.6 shows an error, use your saved v0.5 `.xlsm` copy or retrieve the previou
 6. Verify XLSX and PDF exported files open correctly.
 7. Save and reopen the clean XLSM. Repeat comparison.
 
-All clean-build validations are pending the user's Excel test.
+**Owner confirmation:** the clean build and application function correctly (2026-10-08). Treat this as a successful basic end-to-end smoke test. The specific checks above (particularly precise KPI counts, PDF/XLSX review, and reopened workbook) remain pending individual verification.
