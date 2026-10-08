@@ -1,7 +1,7 @@
 # v0.6 upgrade and acceptance tests
 
 **Reference environment:** Windows 11 in VirtualBox, Microsoft Excel 2019 Desktop.
-**Status:** source published; v0.6 not yet verified inside Excel. v0.5 is backed up in Git branch `backup/v0.5-working`.
+**Status:** clean three-module source and PowerShell builder published; automated clean XLSM build not yet verified inside Excel. v0.5 is backed up in Git branch `backup/v0.5-working`.
 
 ## Safe upgrade from working v0.5
 
@@ -46,3 +46,15 @@ After validation, create and save a clean `ExcelDataReconciliation.xlsm` in Wind
 ## Recovery
 
 If v0.6 shows an error, use your saved v0.5 `.xlsm` copy or retrieve the previous VBA modules from the GitHub `backup/v0.5-working` branch. Report the error text and the VBA line highlighted by Debug.
+
+## Clean reconstruction validation (new)
+
+1. Download the whole repository and run `build/Create-CleanWorkbook.ps1` using Windows Excel 2019 with VBA project-model access temporarily enabled, **or** use the manual path documented in `docs/BUILD_AND_RELEASE.md`.
+2. Confirm the new macro workbook contains **exactly three imported standard modules**: modAdvancedReconciliation, modReportPresentation, modUnifiedDashboard.
+3. Confirm the initial workbook has **Dashboard** but no old Control Panel or Reconciliation v0.4 sheet.
+4. Run **Debug > Compile VBAProject** with no error.
+5. Run the composite demonstration; confirm expected Summary values, KPI sheet, and Run History.
+6. Verify XLSX and PDF exported files open correctly.
+7. Save and reopen the clean XLSM. Repeat comparison.
+
+All clean-build validations are pending the user's Excel test.
