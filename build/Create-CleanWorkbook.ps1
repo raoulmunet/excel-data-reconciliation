@@ -10,13 +10,15 @@ Open source only; do not run scripts from untrusted repositories.
 #>
 [CmdletBinding()]
 param(
-    [string]$OutputPath = (Join-Path $PSScriptRoot 'ExcelDataReconciliation.xlsm')
+    [string]$OutputPath = ''
 )
 $ErrorActionPreference = 'Stop'
+$repoRoot = Split-Path -Parent $PSScriptRoot
+if (-not $OutputPath) { $OutputPath = Join-Path $repoRoot 'ExcelDataReconciliation.xlsm' }
 $modulePaths = @(
-    (Join-Path $PSScriptRoot 'src\modAdvancedReconciliation.bas'),
-    (Join-Path $PSScriptRoot 'src\modReportPresentation.bas'),
-    (Join-Path $PSScriptRoot 'src\modUnifiedDashboard.bas')
+    (Join-Path $repoRoot 'src\modAdvancedReconciliation.bas'),
+    (Join-Path $repoRoot 'src\modReportPresentation.bas'),
+    (Join-Path $repoRoot 'src\modUnifiedDashboard.bas')
 )
 foreach ($path in $modulePaths) {
     if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
