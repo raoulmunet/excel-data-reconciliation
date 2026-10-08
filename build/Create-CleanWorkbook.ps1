@@ -48,6 +48,13 @@ try {
     # 52 = xlOpenXMLWorkbookMacroEnabled
     $book.SaveAs($OutputPath, 52)
     $excel.Run("'" + $book.Name.Replace("'", "''") + "'!BuildUnifiedDashboard")
+    # Remove only the blank default worksheet(s) from the newly-created workbook.
+    for ($i = $book.Worksheets.Count; $i -ge 1; $i--) {
+        $sheet = $book.Worksheets.Item($i)
+        if ($sheet.Name -ne 'Dashboard') {
+            $sheet.Delete()
+        }
+    }
     $book.Save()
     $successful = $true
     Write-Host "Created: $OutputPath"
