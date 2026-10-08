@@ -1,0 +1,7 @@
+~$*
+*.tmp
+*.log
+*.bak
+.DS_Store
+__pycache__/
+.env
