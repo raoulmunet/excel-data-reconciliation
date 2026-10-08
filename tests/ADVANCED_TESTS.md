@@ -1,6 +1,6 @@
 # Advanced reconciliation acceptance tests (v0.3 preview)
 
-**Status:** not yet run in Excel. The user has confirmed previous v0.2 UI works on Windows 11 + Office 2019, but this is a new, unvalidated module.
+**Status (2026-10-08):** project owner confirmed a successful basic run of the advanced macro after selecting the correct composite-key CSV fixtures on Windows 11 + Office 2019 (VirtualBox). Previously observed `Unknown key column: CompanyID` was caused by selecting the older `CustomerID` fixtures. Exact expected metrics, comparison modes and edge cases have **not** been separately verified.
 
 ## Installation
 1. Open the existing `.xlsm` workbook in Excel 2019 Desktop.
@@ -37,3 +37,7 @@ For EXACT and TRIM, differences: `INV-0001/Comment` (`Alpha` vs ` alpha `) and `
 ## Troubleshooting a missing key column
 
 An error such as `Unknown key column: CompanyID` indicates that Source A's parsed header does not contain that column. The original customer fixtures contain `CustomerID` instead. Confirm you selected the **composite** fixture files and typed `CompanyID,InvoiceNo` exactly. The 2026-10-08 source update includes a more informative error listing Source A and its detected columns, plus BOM normalization. Re-import the latest module before retesting. This fix is not yet runtime verified.
+
+## Execution log
+
+- **2026-10-08 — Basic advanced-flow smoke test: PASS (owner-reported).** Correct composite CSV fixtures selected; macro ran successfully. Earlier wrong-file selection explained the missing key. Specific report counts and individual comparison modes not confirmed; the remaining cases above are pending.
