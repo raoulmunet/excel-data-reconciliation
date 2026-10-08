@@ -2,7 +2,7 @@
 
 A VBA-powered Excel utility to compare two CSV datasets using a configurable unique key, identify missing records, changed values and duplicate keys, and export an auditable reconciliation report.
 
-> **Status:** v0.1 source-code MVP — **basic operation confirmed by the project owner on Windows 11 + Microsoft Excel 2019 in VirtualBox (8 October 2026)**. Detailed test cases, other Office versions, Office bitness, and performance remain unverified.
+> **Status:** v0.1 reconciliation engine + v0.2 dashboard UI preview — **basic operation confirmed by the project owner on Windows 11 + Microsoft Excel 2019 in VirtualBox (8 October 2026)**. The new v0.2 dashboard module has **not yet been tested in Excel**. Detailed test cases, other Office versions, Office bitness, and performance remain unverified.
 
 ## Features
 
@@ -47,6 +47,23 @@ A VBA-powered Excel utility to compare two CSV datasets using a configurable uni
 
 To run without dialogs, use `ReconcileCsvFiles(pathA, pathB, keyColumn)` from another VBA procedure.
 
+## Optional graphical dashboard (v0.2 preview — untested)
+
+The repository now includes `src/modDashboard.bas`, an optional Excel worksheet-based UI with **Browse A**, **Browse B**, **Run reconciliation**, and **Save report** controls. It is designed for **Windows 11 + Excel 2019 Desktop** but has **not yet been executed or compiled in Excel**.
+
+1. Follow the setup above to create `ExcelDataReconciliation.xlsm` and import `src/modReconciliation.bas`.
+2. Also import **`src/modDashboard.bas`** through **File > Import File** in the VBA editor.
+3. Run **Debug > Compile VBAProject** and resolve any errors before proceeding; record the outcome in the test matrix.
+4. Press **Alt+F8**, run **`BuildDashboard`** (once). The macro creates a **Control Panel** sheet and buttons.
+5. Use **Browse A** and **Browse B** to select source CSV files (or paste full paths into cells **B6** and **B8**).
+6. Enter your key column name in **B10**, such as `CustomerID`.
+7. Click **Run reconciliation**. A successful run opens a new report workbook containing Summary, Differences, and Data Issues.
+8. Return to the Control Panel and click **Save report**. Choose a local `.xlsx` path.
+
+**Important:** The last report is tracked **in memory**; if you reset the VBA project, close the report, or reopen the tool, run reconciliation again before Save report. The UI requires the original reconciliation module. Rebuilding the dashboard deletes shapes and clears cells on the Control Panel sheet, while preserving the existing B6/B8/B10 configuration values; do not store unrelated content on that sheet.
+
+The dashboard is deliberately based on worksheet shapes instead of ActiveX or third-party UI dependencies. It does not yet provide composite keys, rule configuration, data preview, charts, or scheduling.
+
 ## Quick-start demonstration
 
 Use `samples/customers_before.csv` as Source A, `samples/customers_after.csv` as Source B, and `CustomerID` as key.
@@ -74,6 +91,9 @@ The parser supports UTF-8/ANSI text through Excel's native CSV opening behavior,
 |---|---|---|
 | Import and run VBA module | Owner reports the tool works | **Passed — basic functional smoke test (owner-reported)** |
 | Run exact sample fixtures and verify expected counts | Not explicitly confirmed | Not verified |
+| Import `modDashboard.bas` and compile | New v0.2 UI module | Not tested |
+| Build Control Panel and exercise four buttons | New v0.2 UI module | Not tested |
+| Save report as `.xlsx` through dashboard | New v0.2 UI module | Not tested |
 | Explicit **Debug > Compile VBAProject** | Not explicitly confirmed | Not verified |
 | Duplicate/empty key behavior | Pending manual test | Not tested |
 | Excel 32-bit | No environment yet | Not tested |
@@ -88,6 +108,7 @@ See `tests/TEST_CASES.md` for expected results and edge cases.
 
 ```text
 src/modReconciliation.bas       VBA engine and interactive entrypoint
+src/modDashboard.bas            Optional worksheet-based GUI (v0.2 preview)
 samples/customers_before.csv    Input fixture A
 samples/customers_after.csv     Input fixture B
 tests/TEST_CASES.md             Test scenarios and expectations
@@ -106,9 +127,9 @@ README.md                       Setup, environment, limitations
 
 ## Roadmap
 
-- v0.2 text-preserving CSV parser, composite keys, and normalized comparisons.
-- v0.3 multi-file/batch reconciliation, configurable rules, performance benchmark.
-- v1.0 signed release workbook, dashboard UI, automation and reproducible Excel test evidence.
+- v0.2 **in progress:** dashboard UI source published, pending Excel 2019 validation; next add text-preserving CSV parser and composite keys.
+- v0.3 configurable comparison rules, multi-file/batch reconciliation, performance benchmarks.
+- v1.0 signed release workbook, enhanced dashboard, automation and reproducible Excel test evidence.
 
 ## License
 
