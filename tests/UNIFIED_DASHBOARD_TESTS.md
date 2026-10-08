@@ -1,49 +1,191 @@
-# v0.4 Unified Dashboard — Windows Excel 2019 test plan
+# Excel Data Reconciliation & Comparison Tool
 
-**Status: not yet executed in Microsoft Excel.** Tested v0.2 dashboard and basic v0.3 engine are preserved; this new interface needs validation on Windows 11 / Office 2019 (VirtualBox).
+A VBA-powered Excel utility to compare two CSV datasets using a configurable unique key, identify missing records, changed values and duplicate keys, and export an auditable reconciliation report.
 
-## Installation
+> **Status:** v0.1 engine and v0.2 dashboard owner-tested on Windows 11 + Excel 2019 (VirtualBox); v0.3 advanced reconciliation basic flow owner-tested. **v0.4 unified dashboard: basic functionality confirmed by the project owner on Windows 11 + Excel 2019 (VirtualBox), 8 October 2026.** Individual export checks, comparison modes and edge cases still require explicit evidence.
 
-1. Back up the working `.xlsm` first.
-2. In VBA editor (`Alt+F11`), keep existing `modReconciliation`, `modDashboard`, and `modAdvancedReconciliation` modules.
-3. Download and import **`src/modUnifiedDashboard.bas`**, using **File > Import File**.
-4. Run **Debug > Compile VBAProject**. Stop and report the exact error/line if compilation fails.
-5. In Excel press `Alt+F8` and run `BuildUnifiedDashboard` (once to create the sheet).
-6. A new sheet **Reconciliation v0.4** will appear without replacing the older **Control Panel**.
-7. Select **Source A** and **Source B**, specify `CompanyID,InvoiceNo` in the **Key columns** field, select `EXACT` from the dropdown.
-8. Press **RUN COMPARISON**, review the generated Summary / Differences / Data Issues workbook.
-9. Return to the new dashboard sheet to click **Export XLSX** or **Export PDF**.
+## Features
 
-## Acceptance criteria
+- Choose two CSV files using the Excel file picker.
+- Compare datasets by a specified key column (case-insensitive column selection).
+- Detect duplicates and empty keys before comparison.
+- Report records that exist only in Source A or Source B.
+- Detect field-level value differences on matching keys.
+- Produce **Summary**, **Differences**, and **Data Issues** worksheets.
+- Keep source files unmodified; output is produced in a new workbook.
+- Log configuration and counts in a traceable report.
+- Use late-bound `Scripting.Dictionary` (no required reference checkbox).
 
-| Case | Expected | Actual |
+## Environment & compatibility
+
+| Environment | Status | Notes |
 |---|---|---|
-| Compile all imported modules | No syntax/compile error | Pending |
-| `BuildUnifiedDashboard` | New sheet, 5 working buttons | Pending |
-| Browse A/B; cancel picker | Path updated / cancel leaves path unchanged | Pending |
-| Composite keys + EXACT + samples/composite_* | 0 A-only, 1 B-only, 2 field diffs, 1 unchanged, 0 issues | Pending |
-| Mode TRIM | 0 A-only, 1 B-only, 2 diffs, 1 unchanged, 0 issues | Pending |
-| Mode IGNORE_CASE | 0 A-only, 1 B-only, 1 diff, 2 unchanged, 0 issues | Pending |
-| XLSX export | File saved with 3 sheets and correct summary | Pending |
-| PDF export | Opens with all 3 report sheets present and legible | Pending |
-| Missing or same-file sources | Clear warning, no new report | Pending |
-| Run failure after success | Previous valid report remains available for export | Pending |
-| Rerun after closing prior report | New output tracked correctly | Pending |
-| Rebuild unified sheet | Paths, key columns, comparison mode remain | Pending |
-| v0.2 `BuildDashboard` still works | Older control panel unchanged | Pending |
+| Windows 11 + Microsoft Excel 2019 Desktop (VirtualBox VM) | **Basic functionality confirmed** | Project owner reports successful execution on 8 October 2026; detailed cases and bitness still unverified |
+| Windows 11 + Microsoft Excel 2021 / 2024 / Microsoft 365 Desktop | Designed for; untested | Requires VBA enabled |
+| Windows + Microsoft Excel 2016 Desktop | Designed for; untested | Avoids modern worksheet functions |
+| Windows 10 + Desktop Excel 2016–365 | May work; untested | Windows 10 standard support ended Oct 2025 |
+| Excel 32-bit / 64-bit | Designed for; untested | No Win32 API calls; avoids architecture-specific declarations |
+| macOS Excel Desktop | Unsupported in v0.1 | File picker and runtime behaviors have not been adapted/tested |
+| Excel for the web | **Not supported** | VBA does not execute in browser |
+| Linux / LibreOffice / Wine | **Not supported** | No compatibility guarantee |
+| Office 2013 or earlier | Not targeted | Unsupported legacy versions |
 
-## Notes
+**Lifecycle and security:** Microsoft Office 2016 and 2019 reached end of support on **14 October 2025**. These programs may continue running but do not receive standard security fixes. Excel 2021 support ends October 2026. Prefer supported desktop Office where possible. Compatibility does not imply vendor support or security updates.
 
-- The dashboard uses worksheet shapes, not ActiveX controls.
-- It calls `AdvancedReconcileCsvFiles` from **modAdvancedReconciliation**, rather than the older `ReconcileCsvFiles`.
-- Its currently selected report is kept in VBA memory only. Closing/resetting Excel requires a new reconciliation before export.
-- The PDF export uses Excel's built-in `ExportAsFixedFormat`, exporting the entire report workbook; layout may require print-setup refinements for large reports.
-- CSV input is expected to be UTF-8 and comma-delimited. See the main README for limitations.
-- The latest v0.4 module has no runtime execution evidence yet; GitHub publication is not an Excel test.
+**Office components:** Excel Desktop and built-in VBA are required. Word, PowerPoint, Access, Outlook, a database, third-party Excel add-ins and internet access are **not required** for this project. For future Office integrations, Classic Outlook for Windows will be needed for Outlook COM automation; New Outlook does not provide that VBA/COM interface.
 
-## Known limitations / next improvements
+**Macro security:** Never turn off macro security globally or enable unknown macros. Review the repository source, create a new local `.xlsm` file, import the inspected module, and enable macros only in a trusted copy consistent with your organization's policy. Do not distribute untrusted `.xlsm` files.
 
-- No automatic configuration file or error log persistence.
-- Report is generated in a separate workbook and export requires returning to the Control Panel.
-- The advanced engine catches its own errors and uses dialogs; a future revision should return an explicit success flag/report handle.
-- No configurable numeric/date tolerance or advanced formatting yet.
+## Installation (Windows Excel 2019)
+
+1. Open Excel Desktop. Create a blank workbook and save it as `ExcelDataReconciliation.xlsm` (Excel Macro-Enabled Workbook).
+2. Press `Alt+F11` to open the VBA editor.
+3. Choose **File > Import File**, then import `src/modReconciliation.bas`.
+4. Save your workbook. Reopen it if necessary and allow macros according to your organization's security policy.
+5. Press `Alt+F8` and run `RunReconciliation`; select A and B CSV files and enter the key column name (e.g. `CustomerID`).
+6. Inspect the report workbook generated by the macro. Save it manually as `.xlsx` if desired.
+
+To run without dialogs, use `ReconcileCsvFiles(pathA, pathB, keyColumn)` from another VBA procedure.
+
+## Optional graphical dashboard (v0.2 — owner-confirmed)
+
+The repository now includes `src/modDashboard.bas`, an optional Excel worksheet-based UI with **Browse A**, **Browse B**, **Run reconciliation**, and **Save report** controls. Its basic operation was confirmed by the project owner using **Windows 11 + Excel 2019 Desktop**. Individual edge cases and VBA project compilation evidence are not yet documented.
+
+1. Follow the setup above to create `ExcelDataReconciliation.xlsm` and import `src/modReconciliation.bas`.
+2. Also import **`src/modDashboard.bas`** through **File > Import File** in the VBA editor.
+3. Run **Debug > Compile VBAProject** and resolve any errors before proceeding; record the outcome in the test matrix.
+4. Press **Alt+F8**, run **`BuildDashboard`** (once). The macro creates a **Control Panel** sheet and buttons.
+5. Use **Browse A** and **Browse B** to select source CSV files (or paste full paths into cells **B6** and **B8**).
+6. Enter your key column name in **B10**, such as `CustomerID`.
+7. Click **Run reconciliation**. A successful run opens a new report workbook containing Summary, Differences, and Data Issues.
+8. Return to the Control Panel and click **Save report**. Choose a local `.xlsx` path.
+
+**Important:** The last report is tracked **in memory**; if you reset the VBA project, close the report, or reopen the tool, run reconciliation again before Save report. The UI requires the original reconciliation module. Rebuilding the dashboard deletes shapes and clears cells on the Control Panel sheet, while preserving the existing B6/B8/B10 configuration values; do not store unrelated content on that sheet.
+
+The dashboard is deliberately based on worksheet shapes instead of ActiveX or third-party UI dependencies. It does not yet provide composite keys, rule configuration, data preview, charts, or scheduling.
+
+## Advanced reconciliation (v0.3 — basic run confirmed, further testing pending)
+
+A new **optional** module `src/modAdvancedReconciliation.bas` adds:
+
+- Multiple key columns using comma-separated names, e.g. `CompanyID,InvoiceNo`.
+- UTF-8 CSV parsing using Windows `ADODB.Stream` (late bound) to **preserve text values**, including leading zeroes and long identifiers. UTF-8 BOM, quoted commas, escaped quotes, and quoted multiline fields are handled in code; runtime behavior remains to be tested.
+- Configurable field comparison: `EXACT` (case/whitespace-sensitive), `TRIM` (trims leading/trailing spaces), `IGNORE_CASE` (trims and ignores casing).
+- A new report workbook with **Summary**, **Differences**, and **Data Issues** worksheets.
+
+To try the preview in **Windows Excel 2019**:
+
+1. Download and import `src/modAdvancedReconciliation.bas` into the same `.xlsm` workbook. Keep the original modules.
+2. Run **Debug > Compile VBAProject** and verify there are no compilation errors.
+3. Run **Alt+F8 > RunAdvancedReconciliation** (not the dashboard's existing Run button).
+4. Choose `samples/composite_before.csv` and `samples/composite_after.csv`, set key columns to `CompanyID,InvoiceNo`.
+5. Run each comparison mode and compare the results to `tests/ADVANCED_TESTS.md`.
+
+**Troubleshooting `Unknown key column: CompanyID`:** The original `customers_before.csv` / `customers_after.csv` fixtures use `CustomerID`, not `CompanyID`. For the composite-key demo, select `composite_before.csv` and `composite_after.csv` and enter `CompanyID,InvoiceNo`. The parser now strips common UTF-8 BOM artifacts from header names and prints the detected columns and Source A path when a requested key cannot be found. Re-import the latest `modAdvancedReconciliation.bas` to get this diagnostic fix.
+
+**The project owner confirms the advanced macro works with the correct composite CSV fixtures.** Exact summary figures and other modes were not individually reported. This advanced workflow remains separate from the tested v0.2 UI. The dashboard continues to invoke the original reconciliation engine. Do not represent the advanced module as production-tested until it passes the documented Windows Excel tests. The advanced implementation currently supports UTF-8 comma-delimited input; ANSI in arbitrary legacy code pages and alternative delimiters are not guaranteed. It uses text-based comparisons, not numeric tolerances.
+
+## Unified dashboard (v0.4 — owner-confirmed basic operation)
+
+The new **`src/modUnifiedDashboard.bas`** has been run successfully according to the project owner on Windows 11 + Excel 2019 (8 October 2026). This is a smoke-test confirmation, not comprehensive validation. It provides a single interface for the advanced UTF-8/composite-key reconciliation engine:
+
+- Browse Source A/B CSV files.
+- Enter one key column or multiple comma-separated key columns in **B10**, e.g. `CompanyID,InvoiceNo`.
+- Choose comparison mode in **B12** using a dropdown: `EXACT`, `TRIM`, `IGNORE_CASE`.
+- Click **RUN COMPARISON**, then use **Export XLSX** or **Export PDF** for the resulting three-sheet workbook.
+- Retain settings when rebuilding the new interface.
+
+**Install / upgrade from v0.3:**
+
+1. Save a backup of your currently working `.xlsm` workbook.
+2. Keep your existing `modReconciliation.bas`, `modDashboard.bas`, and `modAdvancedReconciliation.bas` imports. Import `src/modUnifiedDashboard.bas` as an **additional** standard VBA module (File > Import File).
+3. Compile with **Debug > Compile VBAProject** and stop if any error appears.
+4. Run `BuildUnifiedDashboard` from `Alt+F8`; a new worksheet named **Reconciliation v0.4** is created. The older **Control Panel** remains untouched.
+5. Try `samples/composite_before.csv` + `samples/composite_after.csv`, key `CompanyID,InvoiceNo`, mode `EXACT`; expected counts: 0 A-only, 1 B-only, 2 changed fields, 1 unchanged matching row, 0 data issues.
+6. Return to **Reconciliation v0.4** and test both export buttons. Files are saved only when you choose a location.
+
+**Important limitations:** The XLSX export saves the active generated report workbook as an Excel file; PDF export uses Excel's built-in workbook exporter, and wide reports may need print layout adjustment. Generated report tracking is in VBA memory and resets on project reset / workbook close. The advanced engine is still separate and handles its own errors through message boxes. The project owner confirmed basic UI operation, while specific PDF/XLSX export checks have not been individually reported; see `tests/UNIFIED_DASHBOARD_TESTS.md` for the manual acceptance checklist.
+
+## Quick-start demonstration
+
+Use `samples/customers_before.csv` as Source A, `samples/customers_after.csv` as Source B, and `CustomerID` as key.
+
+Expected fixture findings: **1 A-only record**, **1 B-only record**, **2 field differences** across matching keys, and **1 duplicate key in B**. The duplicate key is flagged in Data Issues and excluded from matched-record comparisons.
+
+The original v0.1 engine supports UTF-8/ANSI text through Excel's native CSV opening behavior, comma-delimited data, and quoted fields as handled by Excel. **CSV parsing depends on Windows locale / Excel import behavior**; the MVP explicitly opens files using comma as separator. UTF-8 BOM and non-ASCII characters require dedicated testing on the target environment.
+
+## Behavior and limitations
+
+- The first row of each CSV must contain nonblank, unique column headings.
+- Column names and keys are trimmed; column headings are matched without case sensitivity.
+- Keys are compared case-insensitively (e.g., `abc` and `ABC` refer to the same key). Keys should be text-safe and should not rely on significant leading zeros being preserved by Excel CSV import.
+- Header sets must match (order may differ). Extra or missing headers cause a clear error.
+- Data values are compared as Excel-imported string representations; normalization, numeric tolerances, composite keys and fuzzy matching are future enhancements.
+- Entirely blank rows are skipped.
+- Duplicate keys (including repeated empty-key rows) are tracked as issues. A duplicated key is **excluded from A/B matching** to avoid false matches.
+- CSV import uses temporary Excel workbooks and closes them without saving.
+- Large files are subject to worksheet row and memory limitations; no performance claims yet.
+- The macro does not automatically email reports, write to source data, or access external services.
+
+## Test matrix
+
+| Test | Windows 11 / Excel 2019 | Outcome |
+|---|---|---|
+| Import and run VBA module | Owner reports the tool works | **Passed — basic functional smoke test (owner-reported)** |
+| Run exact sample fixtures and verify expected counts | Not explicitly confirmed | Not verified |
+| Basic v0.2 dashboard operation | Owner tested in Windows 11 / Excel 2019 | **Passed (owner-reported)** |
+| Explicitly compile both VBA modules | Not separately confirmed | Not verified |
+| Individual dashboard button scenarios | Owner confirmed general operation, individual results not provided | Not individually verified |
+| Save report as `.xlsx` through dashboard | New v0.2 UI module | Not tested |
+| Explicit **Debug > Compile VBAProject** | Not explicitly confirmed | Not verified |
+| Duplicate/empty key behavior | Pending manual test | Not tested |
+| Excel 32-bit | No environment yet | Not tested |
+| Excel 64-bit | Bitness not confirmed | Not tested |
+| Excel 2021/2024/Microsoft 365 | No environment yet | Not tested |
+| Advanced macro with correct composite CSV fixtures | Owner confirmed successful run on Windows 11 / Excel 2019 | **Passed — owner-reported smoke test** |
+| Advanced EXACT/TRIM/IGNORE_CASE metric assertions | No individual counts confirmed | Not verified |
+| v0.4 unified dashboard basic operation | Owner confirmed working on Windows 11 / Excel 2019 | **Passed — owner-reported smoke test** |
+| v0.4 export XLSX and PDF, exact comparison results | Not individually confirmed | Not verified |
+
+**Evidence note (2026-10-08):** The project owner confirmed: *"Am testat, functioneaza"* (tested; it works) on their Windows 11 / Excel 2019 VirtualBox environment. This confirms a basic successful run, **not** that every fixture assertion, edge case, bitness variant, or Office version passed. Further test results will be recorded here after explicit verification.
+
+See `tests/TEST_CASES.md` for expected results and edge cases.
+
+## Source layout
+
+```text
+src/modReconciliation.bas       VBA engine and interactive entrypoint
+src/modDashboard.bas            Worksheet-based GUI (v0.2)
+src/modAdvancedReconciliation.bas   Advanced UTF-8 CSV/composite key engine (v0.3)
+src/modUnifiedDashboard.bas       Unified comparison & XLSX/PDF export UI (v0.4 preview)
+samples/customers_before.csv    Input fixture A
+samples/customers_after.csv     Input fixture B
+samples/composite_before.csv    Advanced fixture A
+samples/composite_after.csv     Advanced fixture B
+tests/TEST_CASES.md             v0.1/v0.2 test cases
+tests/ADVANCED_TESTS.md          Advanced v0.3 acceptance tests
+tests/UNIFIED_DASHBOARD_TESTS.md  Unified v0.4 acceptance checklist
+docs/ARCHITECTURE.md            Design and tradeoffs
+README.md                       Setup, environment, limitations
+```
+
+## Troubleshooting
+
+- **Macro unavailable:** ensure workbook extension is `.xlsm`, module imported, and enterprise macro policy permits execution.
+- **Type mismatch / syntax error:** run **Debug > Compile VBAProject** in the VBA editor and file an issue with the exact line.
+- **Different CSV columns:** align field names in both files; column order may differ.
+- **Date/number changes or leading zero loss:** Excel's native CSV import may coerce cells. Normalize source data to text or wait for a future text-preserving import mode.
+- **Permission denied:** keep sample files in a readable folder, and avoid read-protected paths.
+- **Security warning:** do not bypass organizational macro policies; request an approved/signed build.
+
+## Roadmap
+
+- v0.2 dashboard: basic run owner-confirmed on Windows 11 / Excel 2019.
+- v0.3 advanced engine: basic successful execution with composite-key fixtures confirmed by the project owner; detailed mode-by-mode checks and edge cases remain pending.
+- v0.4 unified dashboard: basic operation confirmed by the project owner on Windows 11 / Excel 2019; full export and comparison-mode regression checks remain pending.
+- Next: improve comparison engine error/result signaling, add batch reconciliation and performance benchmarks.
+- v1.0: release workbook, enhanced dashboard, automation, and reproducible Excel test evidence.
+
+## License
+
+MIT (see `LICENSE`). Sample data is synthetic and safe for portfolio demonstration.
