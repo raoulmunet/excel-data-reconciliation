@@ -2,7 +2,7 @@
 
 A VBA-powered Excel utility to compare two CSV datasets using a configurable unique key, identify missing records, changed values and duplicate keys, and export an auditable reconciliation report.
 
-> **Status:** v0.1 engine and v0.2 dashboard owner-tested on Windows 11 + Excel 2019 (VirtualBox); v0.3 advanced reconciliation basic flow owner-tested. **v0.4 unified dashboard: basic functionality confirmed by the project owner on Windows 11 + Excel 2019 (VirtualBox), 8 October 2026.** Individual export checks, comparison modes and edge cases still require explicit evidence.
+> **Status:** v0.1 engine and v0.2 dashboard owner-tested on Windows 11 + Excel 2019 (VirtualBox); v0.3 advanced reconciliation basic flow owner-tested. **v0.4 unified dashboard: basic functionality confirmed by the project owner on Windows 11 + Excel 2019 (VirtualBox), 8 October 2026.** Individual export checks, comparison modes and edge cases still require explicit evidence. **v0.5 reporting and execution-history integration is published as source, not yet tested in Excel.**
 
 ## Features
 
@@ -106,6 +106,22 @@ The new **`src/modUnifiedDashboard.bas`** has been run successfully according to
 
 **Important limitations:** The XLSX export saves the active generated report workbook as an Excel file; PDF export uses Excel's built-in workbook exporter, and wide reports may need print layout adjustment. Generated report tracking is in VBA memory and resets on project reset / workbook close. The advanced engine is still separate and handles its own errors through message boxes. The project owner confirmed basic UI operation, while specific PDF/XLSX export checks have not been individually reported; see `tests/UNIFIED_DASHBOARD_TESTS.md` for the manual acceptance checklist.
 
+## v0.5 KPI Reporting and Run History (pending Excel 2019 verification)
+
+New module: [`src/modReportPresentation.bas`](src/modReportPresentation.bas). The latest [`modUnifiedDashboard.bas`](src/modUnifiedDashboard.bas) now calls this module after advanced reconciliation succeeds.
+
+Features implemented in source:
+- A new **KPI Dashboard** sheet in the generated report showing matched keys, changed keys, unchanged keys, changed fields, unmatched keys, duplicate/data issues and match rate.
+- Highlighting of changed fields and A-only/B-only statuses, plus report page settings for PDF printing.
+- A **Run History** worksheet in the macro-enabled tool workbook recording timestamps, source paths, composite keys, comparison mode, duration and outcome.
+- XLSX and PDF export remains available via the unified Control Panel and should now include the KPI sheet.
+
+**Upgrade existing working v0.4 workbook:** create a backup; replace the existing `modUnifiedDashboard` module with the latest `src/modUnifiedDashboard.bas` (remove the old one first), then import `src/modReportPresentation.bas`. Keep the other VBA modules. Run **Debug > Compile VBAProject**, then launch `BuildUnifiedDashboard` using `Alt+F8` and run the composite sample. Read [`tests/REPORTING_TESTS.md`](tests/REPORTING_TESTS.md) for exact expected KPI metrics.
+
+**Note:** This is a *source-code preview*. Only the earlier v0.4 interface has been user-tested. The v0.5 modules require compilation and execution in your Windows 11 / Excel 2019 VirtualBox environment. The `Run History` worksheet is saved only when you save the tool workbook (`.xlsm`). Data paths may be sensitive: clear history before sharing a public demo workbook. The PDF layout requires visual inspection.
+
+For clean workbook assembly, see [`docs/BUILD_AND_RELEASE.md`](docs/BUILD_AND_RELEASE.md). No pre-built `.xlsm` release artifact is available yet.
+
 ## Quick-start demonstration
 
 Use `samples/customers_before.csv` as Source A, `samples/customers_after.csv` as Source B, and `CustomerID` as key.
@@ -157,7 +173,8 @@ See `tests/TEST_CASES.md` for expected results and edge cases.
 src/modReconciliation.bas       VBA engine and interactive entrypoint
 src/modDashboard.bas            Worksheet-based GUI (v0.2)
 src/modAdvancedReconciliation.bas   Advanced UTF-8 CSV/composite key engine (v0.3)
-src/modUnifiedDashboard.bas       Unified comparison & XLSX/PDF export UI (v0.4 preview)
+src/modUnifiedDashboard.bas       Unified comparison & XLSX/PDF UI (v0.5 integrated)
+src/modReportPresentation.bas      KPI dashboard, report styling and run history
 samples/customers_before.csv    Input fixture A
 samples/customers_after.csv     Input fixture B
 samples/composite_before.csv    Advanced fixture A
@@ -165,6 +182,8 @@ samples/composite_after.csv     Advanced fixture B
 tests/TEST_CASES.md             v0.1/v0.2 test cases
 tests/ADVANCED_TESTS.md          Advanced v0.3 acceptance tests
 tests/UNIFIED_DASHBOARD_TESTS.md  Unified v0.4 acceptance checklist
+tests/REPORTING_TESTS.md          v0.5 reporting acceptance tests
+docs/BUILD_AND_RELEASE.md         Manual XLSM packaging instructions
 docs/ARCHITECTURE.md            Design and tradeoffs
 README.md                       Setup, environment, limitations
 ```
@@ -183,7 +202,8 @@ README.md                       Setup, environment, limitations
 - v0.2 dashboard: basic run owner-confirmed on Windows 11 / Excel 2019.
 - v0.3 advanced engine: basic successful execution with composite-key fixtures confirmed by the project owner; detailed mode-by-mode checks and edge cases remain pending.
 - v0.4 unified dashboard: basic operation confirmed by the project owner on Windows 11 / Excel 2019; full export and comparison-mode regression checks remain pending.
-- Next: improve comparison engine error/result signaling, add batch reconciliation and performance benchmarks.
+- v0.5 source published: KPI dashboard, difference highlighting, report print layouts and Run History. Excel runtime testing pending.
+- Next: improve error/result signaling, add batch reconciliation and performance benchmarks.
 - v1.0: release workbook, enhanced dashboard, automation, and reproducible Excel test evidence.
 
 ## License
