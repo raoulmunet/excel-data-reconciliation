@@ -33,3 +33,7 @@ For EXACT and TRIM, differences: `INV-0001/Comment` (`Alpha` vs ` alpha `) and `
 - Very large datasets: no performance benchmarks yet.
 
 **Important:** Test using synthetic data. Do not use private client spreadsheets for initial verification.
+
+## Troubleshooting a missing key column
+
+An error such as `Unknown key column: CompanyID` indicates that Source A's parsed header does not contain that column. The original customer fixtures contain `CustomerID` instead. Confirm you selected the **composite** fixture files and typed `CompanyID,InvoiceNo` exactly. The 2026-10-08 source update includes a more informative error listing Source A and its detected columns, plus BOM normalization. Re-import the latest module before retesting. This fix is not yet runtime verified.
