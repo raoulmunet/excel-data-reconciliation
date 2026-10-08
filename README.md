@@ -2,7 +2,7 @@
 
 A VBA-powered Excel utility to compare two CSV datasets using a configurable unique key, identify missing records, changed values and duplicate keys, and export an auditable reconciliation report.
 
-> **Status:** v0.1 reconciliation engine + v0.2 dashboard UI preview — **basic operation confirmed by the project owner on Windows 11 + Microsoft Excel 2019 in VirtualBox (8 October 2026)**. The new v0.2 dashboard module has **not yet been tested in Excel**. Detailed test cases, other Office versions, Office bitness, and performance remain unverified.
+> **Status:** v0.1 reconciliation engine and v0.2 Control Panel confirmed operational by the project owner on Windows 11 + Excel 2019 (VirtualBox). **v0.3 advanced engine (composite keys, UTF-8 CSV parser, normalization) is published as a preview but has not yet been tested in Excel.**
 
 ## Features
 
@@ -47,9 +47,9 @@ A VBA-powered Excel utility to compare two CSV datasets using a configurable uni
 
 To run without dialogs, use `ReconcileCsvFiles(pathA, pathB, keyColumn)` from another VBA procedure.
 
-## Optional graphical dashboard (v0.2 preview — untested)
+## Optional graphical dashboard (v0.2 — owner-confirmed)
 
-The repository now includes `src/modDashboard.bas`, an optional Excel worksheet-based UI with **Browse A**, **Browse B**, **Run reconciliation**, and **Save report** controls. It is designed for **Windows 11 + Excel 2019 Desktop** but has **not yet been executed or compiled in Excel**.
+The repository now includes `src/modDashboard.bas`, an optional Excel worksheet-based UI with **Browse A**, **Browse B**, **Run reconciliation**, and **Save report** controls. Its basic operation was confirmed by the project owner using **Windows 11 + Excel 2019 Desktop**. Individual edge cases and VBA project compilation evidence are not yet documented.
 
 1. Follow the setup above to create `ExcelDataReconciliation.xlsm` and import `src/modReconciliation.bas`.
 2. Also import **`src/modDashboard.bas`** through **File > Import File** in the VBA editor.
@@ -64,13 +64,32 @@ The repository now includes `src/modDashboard.bas`, an optional Excel worksheet-
 
 The dashboard is deliberately based on worksheet shapes instead of ActiveX or third-party UI dependencies. It does not yet provide composite keys, rule configuration, data preview, charts, or scheduling.
 
+## Advanced reconciliation (v0.3 preview — Excel runtime testing pending)
+
+A new **optional** module `src/modAdvancedReconciliation.bas` adds:
+
+- Multiple key columns using comma-separated names, e.g. `CompanyID,InvoiceNo`.
+- UTF-8 CSV parsing using Windows `ADODB.Stream` (late bound) to **preserve text values**, including leading zeroes and long identifiers. UTF-8 BOM, quoted commas, escaped quotes, and quoted multiline fields are handled in code; runtime behavior remains to be tested.
+- Configurable field comparison: `EXACT` (case/whitespace-sensitive), `TRIM` (trims leading/trailing spaces), `IGNORE_CASE` (trims and ignores casing).
+- A new report workbook with **Summary**, **Differences**, and **Data Issues** worksheets.
+
+To try the preview in **Windows Excel 2019**:
+
+1. Download and import `src/modAdvancedReconciliation.bas` into the same `.xlsm` workbook. Keep the original modules.
+2. Run **Debug > Compile VBAProject** and verify there are no compilation errors.
+3. Run **Alt+F8 > RunAdvancedReconciliation** (not the dashboard's existing Run button).
+4. Choose `samples/composite_before.csv` and `samples/composite_after.csv`, set key columns to `CompanyID,InvoiceNo`.
+5. Run each comparison mode and compare the results to `tests/ADVANCED_TESTS.md`.
+
+**This is intentionally separate from the tested v0.2 UI.** The dashboard continues to invoke the original reconciliation engine. Do not represent the advanced module as production-tested until it passes the documented Windows Excel tests. The advanced implementation currently supports UTF-8 comma-delimited input; ANSI in arbitrary legacy code pages and alternative delimiters are not guaranteed. It uses text-based comparisons, not numeric tolerances.
+
 ## Quick-start demonstration
 
 Use `samples/customers_before.csv` as Source A, `samples/customers_after.csv` as Source B, and `CustomerID` as key.
 
 Expected fixture findings: **1 A-only record**, **1 B-only record**, **2 field differences** across matching keys, and **1 duplicate key in B**. The duplicate key is flagged in Data Issues and excluded from matched-record comparisons.
 
-The parser supports UTF-8/ANSI text through Excel's native CSV opening behavior, comma-delimited data, and quoted fields as handled by Excel. **CSV parsing depends on Windows locale / Excel import behavior**; the MVP explicitly opens files using comma as separator. UTF-8 BOM and non-ASCII characters require dedicated testing on the target environment.
+The original v0.1 engine supports UTF-8/ANSI text through Excel's native CSV opening behavior, comma-delimited data, and quoted fields as handled by Excel. **CSV parsing depends on Windows locale / Excel import behavior**; the MVP explicitly opens files using comma as separator. UTF-8 BOM and non-ASCII characters require dedicated testing on the target environment.
 
 ## Behavior and limitations
 
@@ -91,8 +110,9 @@ The parser supports UTF-8/ANSI text through Excel's native CSV opening behavior,
 |---|---|---|
 | Import and run VBA module | Owner reports the tool works | **Passed — basic functional smoke test (owner-reported)** |
 | Run exact sample fixtures and verify expected counts | Not explicitly confirmed | Not verified |
-| Import `modDashboard.bas` and compile | New v0.2 UI module | Not tested |
-| Build Control Panel and exercise four buttons | New v0.2 UI module | Not tested |
+| Basic v0.2 dashboard operation | Owner tested in Windows 11 / Excel 2019 | **Passed (owner-reported)** |
+| Explicitly compile both VBA modules | Not separately confirmed | Not verified |
+| Individual dashboard button scenarios | Owner confirmed general operation, individual results not provided | Not individually verified |
 | Save report as `.xlsx` through dashboard | New v0.2 UI module | Not tested |
 | Explicit **Debug > Compile VBAProject** | Not explicitly confirmed | Not verified |
 | Duplicate/empty key behavior | Pending manual test | Not tested |
@@ -108,10 +128,14 @@ See `tests/TEST_CASES.md` for expected results and edge cases.
 
 ```text
 src/modReconciliation.bas       VBA engine and interactive entrypoint
-src/modDashboard.bas            Optional worksheet-based GUI (v0.2 preview)
+src/modDashboard.bas            Worksheet-based GUI (v0.2)
+src/modAdvancedReconciliation.bas   Advanced UTF-8 CSV/composite key engine (v0.3 preview)
 samples/customers_before.csv    Input fixture A
 samples/customers_after.csv     Input fixture B
-tests/TEST_CASES.md             Test scenarios and expectations
+samples/composite_before.csv    Advanced fixture A
+samples/composite_after.csv     Advanced fixture B
+tests/TEST_CASES.md             v0.1/v0.2 test cases
+tests/ADVANCED_TESTS.md          Advanced v0.3 acceptance tests
 docs/ARCHITECTURE.md            Design and tradeoffs
 README.md                       Setup, environment, limitations
 ```
@@ -127,9 +151,10 @@ README.md                       Setup, environment, limitations
 
 ## Roadmap
 
-- v0.2 **in progress:** dashboard UI source published, pending Excel 2019 validation; next add text-preserving CSV parser and composite keys.
-- v0.3 configurable comparison rules, multi-file/batch reconciliation, performance benchmarks.
-- v1.0 signed release workbook, enhanced dashboard, automation and reproducible Excel test evidence.
+- v0.2 dashboard: basic run owner-confirmed on Windows 11 / Excel 2019.
+- v0.3 preview: composite keys, UTF-8 text-preserving CSV parser, and three comparison rules published; awaiting Excel runtime testing.
+- Next: integrate advanced options into Control Panel, then add batch reconciliation and performance benchmarks.
+- v1.0: release workbook, enhanced dashboard, automation, and reproducible Excel test evidence.
 
 ## License
 
