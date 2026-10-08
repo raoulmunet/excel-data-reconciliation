@@ -1,0 +1,4 @@
+CompanyID,InvoiceNo,Customer,Amount,Comment
+001,INV-0001,Alice,100.00,Alpha
+001,INV-0002,Bob,55.50,Blue
+002,INV-0001,Carla,70.00,OK
