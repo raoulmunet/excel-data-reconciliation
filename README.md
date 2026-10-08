@@ -2,7 +2,7 @@
 
 A VBA-powered Excel utility to compare two CSV datasets using a configurable unique key, identify missing records, changed values and duplicate keys, and export an auditable reconciliation report.
 
-> **Status:** v0.1 reconciliation engine and v0.2 Control Panel confirmed operational by the project owner on Windows 11 + Excel 2019 (VirtualBox). **v0.3 advanced engine (composite keys, UTF-8 CSV parser, normalization) is published as a preview but has not yet been tested in Excel.**
+> **Status:** v0.1 reconciliation engine and v0.2 Control Panel confirmed operational by the project owner on Windows 11 + Excel 2019 (VirtualBox). **v0.3 advanced engine: owner-confirmed basic successful execution with the correct composite-key CSV fixtures (8 October 2026); individual comparison modes, expected counts, edge cases and performance are not yet separately verified.**
 
 ## Features
 
@@ -64,7 +64,7 @@ The repository now includes `src/modDashboard.bas`, an optional Excel worksheet-
 
 The dashboard is deliberately based on worksheet shapes instead of ActiveX or third-party UI dependencies. It does not yet provide composite keys, rule configuration, data preview, charts, or scheduling.
 
-## Advanced reconciliation (v0.3 preview — Excel runtime testing pending)
+## Advanced reconciliation (v0.3 — basic run confirmed, further testing pending)
 
 A new **optional** module `src/modAdvancedReconciliation.bas` adds:
 
@@ -83,7 +83,7 @@ To try the preview in **Windows Excel 2019**:
 
 **Troubleshooting `Unknown key column: CompanyID`:** The original `customers_before.csv` / `customers_after.csv` fixtures use `CustomerID`, not `CompanyID`. For the composite-key demo, select `composite_before.csv` and `composite_after.csv` and enter `CompanyID,InvoiceNo`. The parser now strips common UTF-8 BOM artifacts from header names and prints the detected columns and Source A path when a requested key cannot be found. Re-import the latest `modAdvancedReconciliation.bas` to get this diagnostic fix.
 
-**This is intentionally separate from the tested v0.2 UI.** The dashboard continues to invoke the original reconciliation engine. Do not represent the advanced module as production-tested until it passes the documented Windows Excel tests. The advanced implementation currently supports UTF-8 comma-delimited input; ANSI in arbitrary legacy code pages and alternative delimiters are not guaranteed. It uses text-based comparisons, not numeric tolerances.
+**The project owner confirms the advanced macro works with the correct composite CSV fixtures.** Exact summary figures and other modes were not individually reported. This advanced workflow remains separate from the tested v0.2 UI. The dashboard continues to invoke the original reconciliation engine. Do not represent the advanced module as production-tested until it passes the documented Windows Excel tests. The advanced implementation currently supports UTF-8 comma-delimited input; ANSI in arbitrary legacy code pages and alternative delimiters are not guaranteed. It uses text-based comparisons, not numeric tolerances.
 
 ## Quick-start demonstration
 
@@ -121,6 +121,8 @@ The original v0.1 engine supports UTF-8/ANSI text through Excel's native CSV ope
 | Excel 32-bit | No environment yet | Not tested |
 | Excel 64-bit | Bitness not confirmed | Not tested |
 | Excel 2021/2024/Microsoft 365 | No environment yet | Not tested |
+| Advanced macro with correct composite CSV fixtures | Owner confirmed successful run on Windows 11 / Excel 2019 | **Passed — owner-reported smoke test** |
+| Advanced EXACT/TRIM/IGNORE_CASE metric assertions | No individual counts confirmed | Not verified |
 
 **Evidence note (2026-10-08):** The project owner confirmed: *"Am testat, functioneaza"* (tested; it works) on their Windows 11 / Excel 2019 VirtualBox environment. This confirms a basic successful run, **not** that every fixture assertion, edge case, bitness variant, or Office version passed. Further test results will be recorded here after explicit verification.
 
@@ -154,7 +156,7 @@ README.md                       Setup, environment, limitations
 ## Roadmap
 
 - v0.2 dashboard: basic run owner-confirmed on Windows 11 / Excel 2019.
-- v0.3 preview: composite keys, UTF-8 text-preserving CSV parser, and three comparison rules published; awaiting Excel runtime testing.
+- v0.3 advanced engine: basic successful execution with composite-key fixtures confirmed by the project owner; detailed mode-by-mode checks and edge cases remain pending.
 - Next: integrate advanced options into Control Panel, then add batch reconciliation and performance benchmarks.
 - v1.0: release workbook, enhanced dashboard, automation, and reproducible Excel test evidence.
 
