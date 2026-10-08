@@ -81,6 +81,8 @@ To try the preview in **Windows Excel 2019**:
 4. Choose `samples/composite_before.csv` and `samples/composite_after.csv`, set key columns to `CompanyID,InvoiceNo`.
 5. Run each comparison mode and compare the results to `tests/ADVANCED_TESTS.md`.
 
+**Troubleshooting `Unknown key column: CompanyID`:** The original `customers_before.csv` / `customers_after.csv` fixtures use `CustomerID`, not `CompanyID`. For the composite-key demo, select `composite_before.csv` and `composite_after.csv` and enter `CompanyID,InvoiceNo`. The parser now strips common UTF-8 BOM artifacts from header names and prints the detected columns and Source A path when a requested key cannot be found. Re-import the latest `modAdvancedReconciliation.bas` to get this diagnostic fix.
+
 **This is intentionally separate from the tested v0.2 UI.** The dashboard continues to invoke the original reconciliation engine. Do not represent the advanced module as production-tested until it passes the documented Windows Excel tests. The advanced implementation currently supports UTF-8 comma-delimited input; ANSI in arbitrary legacy code pages and alternative delimiters are not guaranteed. It uses text-based comparisons, not numeric tolerances.
 
 ## Quick-start demonstration
