@@ -24,3 +24,20 @@ Expected **Summary**:
 11. Excel 32-bit and Excel 64-bit: import/compile/run separately.
 
 All tests are **pending**. Do not report them as passed until results are recorded from Excel.
+
+## Dashboard UI v0.2 test plan (not executed)
+
+1. Import both `modReconciliation.bas` and `modDashboard.bas`; run **Debug > Compile VBAProject**; expect no compile errors.
+2. Execute `BuildDashboard`; expect a **Control Panel** worksheet with Browse A, Browse B, Run reconciliation, Save report buttons.
+3. Select sample CSVs; expect paths in `B6` and `B8`; enter `CustomerID` in `B10`.
+4. Click Run reconciliation; expect a separate report workbook, plus a completion message in `B14`.
+5. Verify Summary metrics against the fixture counts above (1 A-only, 1 B-only, 2 changed fields, 1 unchanged matched record, 1 issue).
+6. Return to Control Panel, click Save report; choose a temporary `.xlsx` file; reopen it and check three expected sheets.
+7. Click Browse and cancel: existing paths should remain unchanged.
+8. Enter a nonexistent path: visible validation error, no new report.
+9. Run `BuildDashboard` again: buttons regenerated; `B6`, `B8`, `B10` settings preserved.
+10. Close the report workbook and attempt Save report: expect explanatory error, not a crash.
+11. Run the comparison twice; Save report should target the second result.
+12. Disable macro execution: document security restrictions without bypassing policy.
+
+**Execution evidence:** awaiting tests on Windows 11 + Office 2019 VirtualBox. Do not label these tests as passed before the owner confirms them.
