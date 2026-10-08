@@ -2,7 +2,24 @@
 
 A VBA-powered Excel utility to compare two CSV datasets using a configurable unique key, identify missing records, changed values and duplicate keys, and export an auditable reconciliation report.
 
-> **Status:** v0.1 engine and v0.2 dashboard owner-tested on Windows 11 + Excel 2019 (VirtualBox); v0.3 advanced reconciliation basic flow owner-tested. **v0.4 unified dashboard: basic functionality confirmed by the project owner on Windows 11 + Excel 2019 (VirtualBox), 8 October 2026.** Individual export checks, comparison modes and edge cases still require explicit evidence. **v0.5 reporting and execution-history integration is published as source, not yet tested in Excel.**
+> **Status:** v0.1–v0.5 core workflows were confirmed working by the project owner in Windows 11 / Excel 2019 (VirtualBox). **v0.6 clean Dashboard migration has been published but is awaiting Excel runtime validation.** The previous working v0.5 source is saved at [backup/v0.5-working](https://github.com/raoulmunet/excel-data-reconciliation/tree/backup/v0.5-working). Other Office versions are compatibility targets, not verified.
+
+## v0.6 unified interface upgrade
+
+Version **v0.6** cleans up the main interface:
+- Renames the active worksheet from `Reconciliation v0.4` to **`Dashboard`** when `BuildUnifiedDashboard` runs.
+- Changes the heading to **DATA RECONCILIATION | v0.6**.
+- Preserves source paths, key columns and comparison mode from the previous sheet.
+- Removes the **dependency** on the old `Control Panel` worksheet. Legacy VBA modules remain in GitHub for backward compatibility.
+- Clarifies that the generated XLSX/PDF report contains **four** worksheets (including `KPI Dashboard`).
+
+**Upgrade procedure:** Back up the working `.xlsm`. Remove the old standard VBA module named `modUnifiedDashboard`, then import the latest [`src/modUnifiedDashboard.bas`](src/modUnifiedDashboard.bas). Retain the existing `modAdvancedReconciliation` and `modReportPresentation` modules. Compile (**Debug > Compile VBAProject**), then execute **`BuildUnifiedDashboard`** with **Alt+F8**. Test reconciliation and exports. If the old worksheet was deleted earlier, the macro creates a fresh `Dashboard`.
+
+**Do not manually rename or delete the active worksheet before upgrading.** The macro handles migration. The legacy `Control Panel` may be removed or omitted from clean releases; keep `Run History`.
+
+Detailed acceptance checklist: [tests/V06_ACCEPTANCE.md](tests/V06_ACCEPTANCE.md). Previous working source: [backup/v0.5-working](https://github.com/raoulmunet/excel-data-reconciliation/tree/backup/v0.5-working).
+
+**Distribution:** We do not yet publish a ready-to-run `.xlsm` binary: create and validate it in Microsoft Excel Desktop following [docs/BUILD_AND_RELEASE.md](docs/BUILD_AND_RELEASE.md). An actual Office/VBA compile and functional test are mandatory before a release is advertised as tested.
 
 ## Features
 
@@ -183,6 +200,7 @@ tests/TEST_CASES.md             v0.1/v0.2 test cases
 tests/ADVANCED_TESTS.md          Advanced v0.3 acceptance tests
 tests/UNIFIED_DASHBOARD_TESTS.md  Unified v0.4 acceptance checklist
 tests/REPORTING_TESTS.md          v0.5 reporting acceptance tests
+tests/V06_ACCEPTANCE.md          v0.6 upgrade and test checklist
 docs/BUILD_AND_RELEASE.md         Manual XLSM packaging instructions
 docs/ARCHITECTURE.md            Design and tradeoffs
 README.md                       Setup, environment, limitations
@@ -202,7 +220,8 @@ README.md                       Setup, environment, limitations
 - v0.2 dashboard: basic run owner-confirmed on Windows 11 / Excel 2019.
 - v0.3 advanced engine: basic successful execution with composite-key fixtures confirmed by the project owner; detailed mode-by-mode checks and edge cases remain pending.
 - v0.4 unified dashboard: basic operation confirmed by the project owner on Windows 11 / Excel 2019; full export and comparison-mode regression checks remain pending.
-- v0.5 source published: KPI dashboard, difference highlighting, report print layouts and Run History. Excel runtime testing pending.
+- v0.5: functional execution owner-confirmed; detailed edge case / export acceptance still pending.
+- v0.6: clean Dashboard renaming and migration published, awaiting validation in Excel 2019.
 - Next: improve error/result signaling, add batch reconciliation and performance benchmarks.
 - v1.0: release workbook, enhanced dashboard, automation, and reproducible Excel test evidence.
 
