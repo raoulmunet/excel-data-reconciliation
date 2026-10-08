@@ -1,35 +1,38 @@
-# Build instructions (Excel 2019, Windows 11)
+# Clean XLSM build — Excel 2019 on Windows 11
 
-This repository currently publishes VBA source modules rather than a compiled or runtime-tested XLSM release.
+Current production source files (and **only these three**):
+- `src/modAdvancedReconciliation.bas`
+- `src/modReportPresentation.bas`
+- `src/modUnifiedDashboard.bas`
 
-## Assemble a workbook
-1. In Excel 2019 Desktop, create a blank workbook and save it as ExcelDataReconciliation.xlsm.
-2. Press Alt+F11. Import these files with File > Import File:
-   - src/modReconciliation.bas
-   - src/modDashboard.bas
-   - src/modAdvancedReconciliation.bas
-   - src/modReportPresentation.bas
-   - src/modUnifiedDashboard.bas
+Legacy modules were removed from the main branch and preserved in `archive/pre-clean-build-2026-10-08`.
+
+## Automated build (PowerShell + installed Excel)
+
+1. Download/extract the **whole repository**.
+2. In Excel: File > Options > Trust Center > Trust Center Settings > Macro Settings > enable **Trust access to the VBA project object model** temporarily. Do not disable other macro protections.
+3. Close Excel. Open **Windows PowerShell** in the repository root.
+4. Run `powershell.exe -NoProfile -File .\build\Create-CleanWorkbook.ps1`.
+5. The builder refuses to overwrite an existing `ExcelDataReconciliation.xlsm`. Move/rename it first if needed.
+6. The new file is created in the **repository root**. Open in Excel, run Debug > Compile VBAProject, then the composite-key sample test.
+7. Turn off the temporary **Trust access to the VBA project object model** permission afterwards.
+
+If script execution is restricted by local/enterprise policy, follow the manual path below; avoid disabling those restrictions globally.
+
+## Manual build (alternative)
+
+1. Create a fresh workbook in Excel Desktop; Save As > Excel Macro-Enabled Workbook (.xlsm).
+2. Alt+F11 > File > Import File. Import the **three** .bas modules listed above.
 3. Run Debug > Compile VBAProject.
-4. Execute BuildUnifiedDashboard via Alt+F8. This creates a worksheet named Dashboard (or renames an older Reconciliation v0.4 sheet).
-5. Use the composite CSV demo and compare results with tests/REPORTING_TESTS.md.
-6. Save the workbook, then reopen and test again before sharing it with clients.
+4. Alt+F8 > BuildUnifiedDashboard.
+5. Save workbook. Remove only unused, empty template sheets. Do not delete Dashboard or Run History.
 
-If upgrading an existing workbook, replace the older modUnifiedDashboard module with the latest version; do not import a second module with the same name.
+## Smoke test
 
-## Release status
-- v0.4: basic operation user-confirmed on Windows 11 / Excel 2019.
-- v0.5: basic functionality confirmed by project owner in Excel 2019.
-- v0.6: clean interface upgrade source published; needs Excel 2019 testing before shipping.
-- Other Office versions and Mac are not validated.
-- Excel for the web does not execute VBA.
-- An XLSM release file will be added only after testing and review.
+Choose `samples/composite_before.csv` and `samples/composite_after.csv`, keys `CompanyID,InvoiceNo`, mode `EXACT`. Run comparison. Expected: 0 only A; 1 only B; 2 changed fields; 1 unchanged matched row; 0 issues. Generated report includes KPI Dashboard, Summary, Differences, Data Issues. Verify XLSX/PDF exports. After first run, workbook should contain Dashboard and Run History. See `tests/V06_ACCEPTANCE.md`.
 
-## Clean delivery
-Use only fictional demo datasets. Remove saved local paths and Run History entries before sharing a workbook publicly. Keep macro security policies enabled. Check XLSX and PDF exports manually.
+## Status / safety
 
-## Clean v0.6 release (recommended)
+Earlier incremental XLSM versions were confirmed working by owner on Windows 11 + Excel 2019 / VirtualBox. **This clean build script has not yet been executed or validated there.** No precompiled XLSM has been released here. Do not publish populated Run History or personal Windows file paths with your portfolio file. Office 2019 is out of Microsoft support; use supported Office for customer production environments.
 
-For the unified workflow, only three source modules are needed: `modAdvancedReconciliation.bas`, `modReportPresentation.bas`, and `modUnifiedDashboard.bas`. Historical `modReconciliation.bas` and `modDashboard.bas` may be omitted in a newly built workbook. Run `BuildUnifiedDashboard` and verify that its only application worksheets are `Dashboard` and `Run History` after the first comparison. Generated report workbooks have four sheets, including KPI Dashboard.
-
-For upgrading an existing file, preserve the previous tested `.xlsm` as a backup. Follow `tests/V06_ACCEPTANCE.md`; do not remove existing modules blindly.
+Code signing and final release packaging will follow successful runtime tests.
