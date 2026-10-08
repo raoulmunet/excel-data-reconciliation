@@ -72,8 +72,14 @@ Public Sub AdvancedReconcileCsvFiles(ByVal pathA As String, ByVal pathB As Strin
     For p = LBound(names) To UBound(names)
         key = Trim$(CStr(names(p)))
         If Len(key) = 0 Then Err.Raise vbObjectError + 506, , "Empty key column name."
-        If Not ha.Exists(key) Then _
-           Err.Raise vbObjectError + 507, , "Unknown key column: " & key
+        If Not ha.Exists(key) Then
+            Err.Raise vbObjectError + 507, , _
+                "Unknown key column: " & key & vbCrLf & _
+                "Source A: " & pathA & vbCrLf & _
+                "Available columns: " & HeaderNames(ha) & vbCrLf & _
+                "Hint: the composite sample files use CompanyID,InvoiceNo; " & _
+                "the original customer samples use CustomerID."
+        End If
         keyColsA(p) = CLng(ha(key))
         keyColsB(p) = CLng(hb(key))
     Next p
@@ -289,11 +295,30 @@ Private Function CreateHeaderMap(ByVal header As Variant) As Object
     m.CompareMode = vbTextCompare
     For c = LBound(header) To UBound(header)
         n = Trim$(CStr(header(c)))
+        ' Defensively strip a Unicode BOM that some UTF-8 readers retain.
+        If Len(n) > 0 Then
+            If AscW(Left$(n, 1)) = -257 Then n = Mid$(n, 2)
+        End If
+        ' Also recognize a BOM accidentally interpreted as ANSI characters.
+        If Len(n) >= 3 Then
+            If Left$(n, 3) = ChrW$(239) & ChrW$(187) & ChrW$(191) Then _
+                n = Mid$(n, 4)
+        End If
+        n = Trim$(n)
         If Len(n) = 0 Then Err.Raise vbObjectError + 516, , "Empty header name."
         If m.Exists(n) Then Err.Raise vbObjectError + 517, , "Duplicate header: " & n
         m.Add n, c
     Next c
     Set CreateHeaderMap = m
+End Function
+
+Private Function HeaderNames(ByVal headers As Object) As String
+    Dim name As Variant, result As String
+    For Each name In headers.Keys
+        If Len(result) > 0 Then result = result & ", "
+        result = result & CStr(name)
+    Next name
+    HeaderNames = result
 End Function
 
 Private Sub IndexRows(ByVal rows As Collection, ByRef cols() As Long, _
