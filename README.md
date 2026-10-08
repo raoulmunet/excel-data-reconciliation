@@ -2,7 +2,7 @@
 
 A VBA-powered Excel utility to compare two CSV datasets using a configurable unique key, identify missing records, changed values and duplicate keys, and export an auditable reconciliation report.
 
-> **Status:** v0.1 source-code MVP. The VBA module is ready for import into a macro-enabled workbook, but **has not yet been executed in Microsoft Excel**. Runtime compatibility and performance are not yet certified.
+> **Status:** v0.1 source-code MVP — **basic operation confirmed by the project owner on Windows 11 + Microsoft Excel 2019 in VirtualBox (8 October 2026)**. Detailed test cases, other Office versions, Office bitness, and performance remain unverified.
 
 ## Features
 
@@ -20,7 +20,7 @@ A VBA-powered Excel utility to compare two CSV datasets using a configurable uni
 
 | Environment | Status | Notes |
 |---|---|---|
-| Windows 11 + Microsoft Excel 2019 Desktop (VirtualBox VM) | **Target reference environment – not yet tested** | Planned first validation environment |
+| Windows 11 + Microsoft Excel 2019 Desktop (VirtualBox VM) | **Basic functionality confirmed** | Project owner reports successful execution on 8 October 2026; detailed cases and bitness still unverified |
 | Windows 11 + Microsoft Excel 2021 / 2024 / Microsoft 365 Desktop | Designed for; untested | Requires VBA enabled |
 | Windows + Microsoft Excel 2016 Desktop | Designed for; untested | Avoids modern worksheet functions |
 | Windows 10 + Desktop Excel 2016–365 | May work; untested | Windows 10 standard support ended Oct 2025 |
@@ -72,12 +72,15 @@ The parser supports UTF-8/ANSI text through Excel's native CSV opening behavior,
 
 | Test | Windows 11 / Excel 2019 | Outcome |
 |---|---|---|
-| Import `.bas` and compile | Pending manual test | Not tested |
-| Run sample datasets | Pending manual test | Not tested |
+| Import and run VBA module | Owner reports the tool works | **Passed — basic functional smoke test (owner-reported)** |
+| Run exact sample fixtures and verify expected counts | Not explicitly confirmed | Not verified |
+| Explicit **Debug > Compile VBAProject** | Not explicitly confirmed | Not verified |
 | Duplicate/empty key behavior | Pending manual test | Not tested |
 | Excel 32-bit | No environment yet | Not tested |
 | Excel 64-bit | Bitness not confirmed | Not tested |
 | Excel 2021/2024/Microsoft 365 | No environment yet | Not tested |
+
+**Evidence note (2026-10-08):** The project owner confirmed: *"Am testat, functioneaza"* (tested; it works) on their Windows 11 / Excel 2019 VirtualBox environment. This confirms a basic successful run, **not** that every fixture assertion, edge case, bitness variant, or Office version passed. Further test results will be recorded here after explicit verification.
 
 See `tests/TEST_CASES.md` for expected results and edge cases.
 
