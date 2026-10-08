@@ -1,7 +1,8 @@
 Attribute VB_Name = "modUnifiedDashboard"
 Option Explicit
 
-' v0.4 unified dashboard preview. Windows Excel 2019 Desktop target.
+' v0.5 reporting integration (KPI/formatting/run history). Windows Excel 2019 target.
+' Requires modReportPresentation.bas in addition to the existing modules.
 ' Keep modReconciliation.bas, modDashboard.bas and modAdvancedReconciliation.bas
 ' imported. This module is separate to preserve the tested v0.2 UI.
 Private Const UI_SHEET As String = "Reconciliation v0.4"
@@ -130,6 +131,7 @@ Public Sub UnifiedRun()
     Dim a As String, b As String, keys As String, mode As String
     Dim oldBook As Workbook, candidate As Workbook
     Dim oldCount As Long
+    Dim startTick As Double, elapsed As Double, presentationWarning As String
     On Error GoTo Failed
     Set ws = ThisWorkbook.Worksheets(UI_SHEET)
     a = Trim$(CStr(ws.Range("B6").Value2))
@@ -160,6 +162,7 @@ Public Sub UnifiedRun()
     End If
     Set mReport = Nothing
     oldCount = Application.Workbooks.Count
+    startTick = Timer
     UiStatus "Processing..."
     ' The existing engine handles exceptions internally and shows its own dialog.
     AdvancedReconcileCsvFiles a, b, keys, mode
@@ -172,11 +175,29 @@ Public Sub UnifiedRun()
         End If
     End If
 
+    elapsed = Timer - startTick
+    If elapsed < 0 Then elapsed = elapsed + 86400#
     If mReport Is Nothing Then
         Set mReport = oldBook
+        LogReconciliationRun a, b, keys, mode, "FAILED / NO REPORT", elapsed, _
+                             "Reconciliation produced no validated new workbook."
         UiStatus "Run did not produce a new report; inspect the error dialog"
     Else
-        UiStatus "Completed - report is ready"
+        On Error Resume Next
+        EnhanceReport mReport
+        If Err.Number <> 0 Then
+            presentationWarning = Err.Description
+            Err.Clear
+        End If
+        On Error GoTo Failed
+        If Len(presentationWarning) > 0 Then
+            LogReconciliationRun a, b, keys, mode, "SUCCESS / STYLE WARNING", _
+                                 elapsed, presentationWarning
+            UiStatus "Reconciled; report styling warning - see Run History"
+        Else
+            LogReconciliationRun a, b, keys, mode, "SUCCESS", elapsed
+            UiStatus "Completed - KPI report ready"
+        End If
         mReport.Activate
     End If
     Exit Sub
