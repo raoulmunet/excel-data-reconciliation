@@ -2,7 +2,7 @@
 
 An Excel Desktop application for comparing two **UTF-8 CSV** datasets, finding missing/changed records and duplicate keys, generating KPI dashboards, and exporting reconciliation reports to XLSX and PDF. Designed as a practical Office/VBA portfolio project.
 
-> **Release status:** Clean v0.6 **source and build script** available. Previous incremental builds were owner-tested on **Windows 11 + Excel 2019 in VirtualBox**. **The new clean-build workflow and generated .xlsm have not yet been tested** in Excel. Do not advertise a finished, certified XLSM release until validation is complete.
+> **Release status:** Clean v0.6 **source and build script** available. Previous incremental builds were owner-tested on **Windows 11 + Excel 2019 in VirtualBox**. **The clean-build workflow and resulting XLSM are confirmed working by the project owner (Windows 11 / Excel 2019 / VirtualBox).** Individual edge cases, multi-version validation, and distribution QA remain pending. Do not advertise a finished, certified XLSM release until validation is complete.
 
 ## Main features
 
@@ -106,11 +106,11 @@ The macro workbook should contain **Dashboard** and, after one comparison, **Run
 - The advanced engine handles its errors with Excel message boxes. A failure can be logged as `FAILED / NO REPORT` instead of a detailed exception.
 - Worksheet reporting and PDF pagination may require refinement for large datasets.
 - Never commit client data, local file paths, or populated `Run History` into the public repository.
-- New clean-build functionality must pass Excel 2019 compilation and acceptance checks before release.
+- The clean workbook build has passed an owner-reported end-to-end smoke test in Excel 2019. Individual acceptance assertions, exported file review, and security/distribution checks remain to be documented.
 
 ## Roadmap
 
-1. **v0.6:** Clean three-module architecture and reproducible workbook build — **awaiting user acceptance test**.
+1. **v0.6:** Clean three-module architecture and reproducible workbook build — **basic clean-build and functional test confirmed by owner; release QA pending**.
 2. **v0.7:** Automated acceptance checks, improved error reporting, stable sample release package.
 3. **v1.0:** Validated XLSM release, screenshots, Upwork portfolio assets and versioned documentation.
 
