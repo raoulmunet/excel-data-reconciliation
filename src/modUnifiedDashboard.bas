@@ -1,11 +1,12 @@
 Attribute VB_Name = "modUnifiedDashboard"
 Option Explicit
 
-' v0.5 reporting integration (KPI/formatting/run history). Windows Excel 2019 target.
+' v0.6 unified dashboard and report integration. Windows Excel 2019 target.
 ' Requires modReportPresentation.bas in addition to the existing modules.
-' Keep modReconciliation.bas, modDashboard.bas and modAdvancedReconciliation.bas
-' imported. This module is separate to preserve the tested v0.2 UI.
-Private Const UI_SHEET As String = "Reconciliation v0.4"
+' Requires modAdvancedReconciliation.bas and modReportPresentation.bas.
+' Legacy modules may remain, but the old Control Panel sheet is NOT required.
+Private Const UI_SHEET As String = "Dashboard"
+Private Const OLD_UI_SHEET As String = "Reconciliation v0.4"
 Private mReport As Workbook
 
 Public Sub BuildUnifiedDashboard()
@@ -16,8 +17,20 @@ Public Sub BuildUnifiedDashboard()
     Set ws = ThisWorkbook.Worksheets(UI_SHEET)
     On Error GoTo Failed
     If ws Is Nothing Then
-        Set ws = ThisWorkbook.Worksheets.Add(Before:=ThisWorkbook.Worksheets(1))
-        ws.Name = UI_SHEET
+        ' Migrate the proven v0.5 sheet in place: retain settings before rebuild.
+        On Error Resume Next
+        Set ws = ThisWorkbook.Worksheets(OLD_UI_SHEET)
+        On Error GoTo Failed
+        If ws Is Nothing Then
+            Set ws = ThisWorkbook.Worksheets.Add(Before:=ThisWorkbook.Worksheets(1))
+            ws.Name = UI_SHEET
+        Else
+            a = CStr(ws.Range("B6").Value2)
+            b = CStr(ws.Range("B8").Value2)
+            keys = CStr(ws.Range("B10").Value2)
+            mode = CStr(ws.Range("B12").Value2)
+            ws.Name = UI_SHEET
+        End If
     Else
         a = CStr(ws.Range("B6").Value2)
         b = CStr(ws.Range("B8").Value2)
@@ -37,7 +50,7 @@ Public Sub BuildUnifiedDashboard()
         .Columns("D").ColumnWidth = 23
         .Columns("E").ColumnWidth = 4
         .Range("A1:D2").Merge
-        .Range("A1").Value2 = "DATA RECONCILIATION | v0.4"
+        .Range("A1").Value2 = "DATA RECONCILIATION | v0.6"
         .Range("A1:D2").Interior.Color = RGB(26, 52, 82)
         .Range("A1:D2").Font.Color = vbWhite
         .Range("A1:D2").Font.Bold = True
@@ -73,10 +86,10 @@ Public Sub BuildUnifiedDashboard()
         .Range("A19").WrapText = True
         .Range("A19").Font.Color = RGB(80, 96, 112)
         .Range("A22:D23").Merge
-        .Range("A22").Value2 = "Export XLSX preserves all three report sheets. PDF exports them together."
+        .Range("A22").Value2 = "Excel and PDF exports include KPI Dashboard, Summary, Differences and Data Issues."
         .Range("A22").WrapText = True
         .Range("A22").Font.Color = RGB(80, 96, 112)
-        .Range("A25").Value2 = "v0.4 preview | Windows Excel 2019 | manual verification pending"
+        .Range("A25").Value2 = "v0.6 preview | Windows Excel 2019 | validation pending"
         .Range("A25").Font.Color = RGB(100, 100, 100)
     End With
     UiButton ws, "Browse A", "UnifiedBrowseA", ws.Range("D6"), RGB(35, 103, 161)
