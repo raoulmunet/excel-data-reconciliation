@@ -2,7 +2,7 @@
 
 A VBA-powered Excel utility to compare two CSV datasets using a configurable unique key, identify missing records, changed values and duplicate keys, and export an auditable reconciliation report.
 
-> **Status:** v0.1 reconciliation engine and v0.2 Control Panel confirmed operational by the project owner on Windows 11 + Excel 2019 (VirtualBox). **v0.3 advanced engine: owner-confirmed basic successful execution with the correct composite-key CSV fixtures (8 October 2026); individual comparison modes, expected counts, edge cases and performance are not yet separately verified.**
+> **Status:** v0.1 engine and v0.2 dashboard owner-tested on Windows 11 + Excel 2019 (VirtualBox); v0.3 advanced reconciliation basic flow owner-tested. **v0.4 unified dashboard with advanced comparison and XLSX/PDF exports is published, not yet runtime tested.**
 
 ## Features
 
@@ -85,6 +85,27 @@ To try the preview in **Windows Excel 2019**:
 
 **The project owner confirms the advanced macro works with the correct composite CSV fixtures.** Exact summary figures and other modes were not individually reported. This advanced workflow remains separate from the tested v0.2 UI. The dashboard continues to invoke the original reconciliation engine. Do not represent the advanced module as production-tested until it passes the documented Windows Excel tests. The advanced implementation currently supports UTF-8 comma-delimited input; ANSI in arbitrary legacy code pages and alternative delimiters are not guaranteed. It uses text-based comparisons, not numeric tolerances.
 
+## Unified dashboard (v0.4 preview — awaiting Excel 2019 verification)
+
+The new **`src/modUnifiedDashboard.bas`** provides a single interface for the advanced UTF-8/composite-key reconciliation engine:
+
+- Browse Source A/B CSV files.
+- Enter one key column or multiple comma-separated key columns in **B10**, e.g. `CompanyID,InvoiceNo`.
+- Choose comparison mode in **B12** using a dropdown: `EXACT`, `TRIM`, `IGNORE_CASE`.
+- Click **RUN COMPARISON**, then use **Export XLSX** or **Export PDF** for the resulting three-sheet workbook.
+- Retain settings when rebuilding the new interface.
+
+**Install / upgrade from v0.3:**
+
+1. Save a backup of your currently working `.xlsm` workbook.
+2. Keep your existing `modReconciliation.bas`, `modDashboard.bas`, and `modAdvancedReconciliation.bas` imports. Import `src/modUnifiedDashboard.bas` as an **additional** standard VBA module (File > Import File).
+3. Compile with **Debug > Compile VBAProject** and stop if any error appears.
+4. Run `BuildUnifiedDashboard` from `Alt+F8`; a new worksheet named **Reconciliation v0.4** is created. The older **Control Panel** remains untouched.
+5. Try `samples/composite_before.csv` + `samples/composite_after.csv`, key `CompanyID,InvoiceNo`, mode `EXACT`; expected counts: 0 A-only, 1 B-only, 2 changed fields, 1 unchanged matching row, 0 data issues.
+6. Return to **Reconciliation v0.4** and test both export buttons. Files are saved only when you choose a location.
+
+**Important limitations:** The XLSX export saves the active generated report workbook as an Excel file; PDF export uses Excel's built-in workbook exporter, and wide reports may need print layout adjustment. Generated report tracking is in VBA memory and resets on project reset / workbook close. The advanced engine is still separate and handles its own errors through message boxes. No new Excel runtime or PDF export test has been performed by the assistant; see `tests/UNIFIED_DASHBOARD_TESTS.md` for the manual acceptance checklist.
+
 ## Quick-start demonstration
 
 Use `samples/customers_before.csv` as Source A, `samples/customers_after.csv` as Source B, and `CustomerID` as key.
@@ -123,6 +144,7 @@ The original v0.1 engine supports UTF-8/ANSI text through Excel's native CSV ope
 | Excel 2021/2024/Microsoft 365 | No environment yet | Not tested |
 | Advanced macro with correct composite CSV fixtures | Owner confirmed successful run on Windows 11 / Excel 2019 | **Passed — owner-reported smoke test** |
 | Advanced EXACT/TRIM/IGNORE_CASE metric assertions | No individual counts confirmed | Not verified |
+| v0.4 unified UI and XLSX/PDF export | New module published | Not tested |
 
 **Evidence note (2026-10-08):** The project owner confirmed: *"Am testat, functioneaza"* (tested; it works) on their Windows 11 / Excel 2019 VirtualBox environment. This confirms a basic successful run, **not** that every fixture assertion, edge case, bitness variant, or Office version passed. Further test results will be recorded here after explicit verification.
 
@@ -133,13 +155,15 @@ See `tests/TEST_CASES.md` for expected results and edge cases.
 ```text
 src/modReconciliation.bas       VBA engine and interactive entrypoint
 src/modDashboard.bas            Worksheet-based GUI (v0.2)
-src/modAdvancedReconciliation.bas   Advanced UTF-8 CSV/composite key engine (v0.3 preview)
+src/modAdvancedReconciliation.bas   Advanced UTF-8 CSV/composite key engine (v0.3)
+src/modUnifiedDashboard.bas       Unified comparison & XLSX/PDF export UI (v0.4 preview)
 samples/customers_before.csv    Input fixture A
 samples/customers_after.csv     Input fixture B
 samples/composite_before.csv    Advanced fixture A
 samples/composite_after.csv     Advanced fixture B
 tests/TEST_CASES.md             v0.1/v0.2 test cases
 tests/ADVANCED_TESTS.md          Advanced v0.3 acceptance tests
+tests/UNIFIED_DASHBOARD_TESTS.md  Unified v0.4 acceptance checklist
 docs/ARCHITECTURE.md            Design and tradeoffs
 README.md                       Setup, environment, limitations
 ```
@@ -157,7 +181,8 @@ README.md                       Setup, environment, limitations
 
 - v0.2 dashboard: basic run owner-confirmed on Windows 11 / Excel 2019.
 - v0.3 advanced engine: basic successful execution with composite-key fixtures confirmed by the project owner; detailed mode-by-mode checks and edge cases remain pending.
-- Next: integrate advanced options into Control Panel, then add batch reconciliation and performance benchmarks.
+- v0.4 preview: unified interface for composite keys, comparison modes and XLSX/PDF export has been published and needs Excel 2019 testing.
+- Next: improve comparison engine error/result signaling, add batch reconciliation and performance benchmarks.
 - v1.0: release workbook, enhanced dashboard, automation, and reproducible Excel test evidence.
 
 ## License
