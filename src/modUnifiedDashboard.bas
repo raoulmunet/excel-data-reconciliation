@@ -90,7 +90,7 @@ Failed:
     MsgBox "Cannot create dashboard: " & Err.Description, vbExclamation
 End Sub
 
-Private Sub UiButton(ByVal ws As Worksheet, ByVal label As String, _
+Private Sub UiButton(ByVal ws As Worksheet, ByVal caption As String, _
                      ByVal macroName As String, ByVal anchor As Range, ByVal color As Long)
     Dim shape As Shape
     Set shape = ws.Shapes.AddShape(msoShapeRoundedRectangle, _
@@ -99,7 +99,7 @@ Private Sub UiButton(ByVal ws As Worksheet, ByVal label As String, _
         .Name = "unified_" & macroName
         .Fill.ForeColor.RGB = color
         .Line.Visible = msoFalse
-        .TextFrame.Characters.Text = label
+        .TextFrame.Characters.Text = caption
         .TextFrame.Characters.Font.Color = vbWhite
         .TextFrame.Characters.Font.Bold = True
         .TextFrame.Characters.Font.Size = 10
